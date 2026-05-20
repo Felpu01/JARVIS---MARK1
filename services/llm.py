@@ -18,7 +18,7 @@ def ask_llm(message, context=""):
                 "Content-Type": "application/json"
             },
             json={
-                "model": "meta-llama/llama-3-8b-instruct:free",
+                "model": "google/gemma-2-9b-it:free",
                 "messages": [
                     {
                         "role": "system",
