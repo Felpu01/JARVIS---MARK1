@@ -13,16 +13,17 @@ def ask_llm(message, context=""):
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "HTTP-Referer": "https://jarvis-mark1.onrender.com",
+                "X-Title": "JARVIS Core",
                 "Content-Type": "application/json"
             },
             json={
-                "model": "deepseek/deepseek-chat-v3-0324:free",
+                "model": "mistralai/mistral-7b-instruct:free",
                 "messages": [
                     {
                         "role": "system",
                         "content": (
-                            "You are JARVIS Core, an advanced AI assistant. "
-                            "Be intelligent, concise, calm and helpful."
+                            "You are JARVIS Core, an intelligent AI assistant."
                         )
                     },
                     {
@@ -42,7 +43,17 @@ def ask_llm(message, context=""):
 
         data = response.json()
 
+        print("OPENROUTER RESPONSE:", data)
+
+        # verificar error API
+        if "error" in data:
+            return f"LLM API Error: {data['error']}"
+
+        # verificar choices
+        if "choices" not in data:
+            return f"LLM Invalid Response: {data}"
+
         return data["choices"][0]["message"]["content"]
 
     except Exception as e:
-        return f"LLM Error: {str(e)}"
+        return f"LLM Exception: {str(e)}"
