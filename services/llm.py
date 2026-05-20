@@ -2,7 +2,7 @@ import os
 import requests
 
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
 
 
 def ask_llm(message, context=""):
@@ -10,15 +10,13 @@ def ask_llm(message, context=""):
     try:
 
         response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
+            "https://api.together.xyz/v1/chat/completions",
             headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "HTTP-Referer": "https://jarvis-mark1.onrender.com",
-                "X-Title": "JARVIS Core",
+                "Authorization": f"Bearer {TOGETHER_API_KEY}",
                 "Content-Type": "application/json"
             },
             json={
-                "model": "google/gemma-2-9b-it:free",
+                "model": "meta-llama/Llama-3-8b-chat-hf",
                 "messages": [
                     {
                         "role": "system",
@@ -37,14 +35,16 @@ User:
 {message}
 """
                     }
-                ]
+                ],
+                "temperature": 0.7,
+                "max_tokens": 300
             },
             timeout=60
         )
 
         data = response.json()
 
-        print("OPENROUTER RESPONSE:", data)
+        print("TOGETHER RESPONSE:", data)
 
         if "error" in data:
             return f"LLM API Error: {data['error']}"
