@@ -1,19 +1,112 @@
-from memory.memory import save_memory
-from memory.intelligence import classify_message
-from core.decision_engine import decide, execute_decision
+from memory.memory import save_memory, get_memory
+from memory.intelligence import (
+    classify_message,
+    summarize_history,
+    detect_user_pattern
+)
+
+from core.decision_engine import (
+    decide,
+    execute_decision
+)
+
+
+# =========================
+# JARVIS PERSONALITY
+# =========================
+
+PERSONALITY = """
+You are JARVIS Core.
+
+You are intelligent, calm, efficient and helpful.
+You speak clearly and naturally.
+You maintain conversational context.
+You assist the user like an advanced AI system.
+"""
+
+
+# =========================
+# MAIN BRAIN
+# =========================
 
 def brain(message):
 
-    # 1. guardar memoria base
+    # =========================
+    # SAVE USER MESSAGE
+    # =========================
+
     save_memory("history", message)
 
-    # 2. clasificar intención
+    # =========================
+    # LOAD MEMORY
+    # =========================
+
+    memory = get_memory()
+
+    history = memory.get("history", [])
+
+    recent_history = []
+
+    for item in history[-10:]:
+
+        if isinstance(item, dict):
+            recent_history.append(
+                str(item.get("value", ""))
+            )
+
+        else:
+            recent_history.append(str(item))
+
+    # =========================
+    # CONTEXT ENGINE
+    # =========================
+
+    summarized_context = summarize_history(
+        recent_history
+    )
+
+    user_patterns = detect_user_pattern(
+        recent_history
+    )
+
+    # =========================
+    # INTENT CLASSIFICATION
+    # =========================
+
     category = classify_message(message)
 
-    # 3. decidir qué hacer
-    decision = decide(message, category)
+    # =========================
+    # DECISION ENGINE
+    # =========================
 
-    # 4. ejecutar acción
-    result = execute_decision(decision, message)
+    decision = decide(
+        message,
+        category
+    )
 
-    return result
+    # =========================
+    # ACTION EXECUTION
+    # =========================
+
+    result = execute_decision(
+        decision,
+        message
+    )
+
+    # =========================
+    # SAVE RESPONSE
+    # =========================
+
+    save_memory("jarvis_responses", result)
+
+    # =========================
+    # RETURN FINAL RESPONSE
+    # =========================
+
+    return {
+        "response": result,
+        "category": category,
+        "decision": decision,
+        "patterns": user_patterns,
+        "context_size": len(summarized_context)
+    }
