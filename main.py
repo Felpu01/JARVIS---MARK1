@@ -91,7 +91,7 @@ def jarvis_response(message):
     interest_w = get_weight("interest")
     intent_w = get_weight("intent")
 
-    # 🧠 MARK5 PASO 3 — SCORING AGENT
+    # 🧠 MARK5 PASO 3 — SCORING AGENTE
     message_score = len(message.split())
     history_score = len(history)
     profile_score = identity_w + interest_w + intent_w
@@ -128,6 +128,22 @@ def update_profile(key, value):
         memory["profile"][key]["weight"] += 1
         memory["profile"][key]["value"] = value
 
+# 🧠 PARSING CORREGIDO (IMPORTANTE FIX)
+def extract_profile(message):
+    msg = message.lower()
+
+    if "me gusta" in msg or "me interesa" in msg:
+        clean = message.lower().replace("me gusta", "").replace("me interesa", "").strip()
+        update_profile("interest", clean)
+
+    if "soy" in msg:
+        clean = message.lower().replace("soy", "").strip()
+        update_profile("identity", clean)
+
+    if "quiero" in msg:
+        clean = message.lower().replace("quiero", "").strip()
+        update_profile("intent", clean)
+
 # 🌐 endpoint principal
 @app.route("/")
 def home():
@@ -150,17 +166,8 @@ def chat():
     elif any(x in message.lower() for x in ["qué", "cómo", "por qué"]):
         memory["questions"].append(message)
 
-    # 🧠 perfil básico
-    msg = message.lower()
-
-    if "me gusta" in msg or "me interesa" in msg:
-        update_profile("interest", message)
-
-    if "soy" in msg:
-        update_profile("identity", message)
-
-    if "quiero" in msg:
-        update_profile("intent", message)
+    # 🧠 perfil inteligente
+    extract_profile(message)
 
     # 🧠 respuesta
     response = jarvis_response(message)
