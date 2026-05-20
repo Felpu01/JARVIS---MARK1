@@ -18,23 +18,23 @@ def ask_llm(message, context=""):
                 "Content-Type": "application/json"
             },
             json={
-                "model": "mistralai/mistral-7b-instruct:free",
+                "model": "deepseek/deepseek-chat-v3-0324:free",
                 "messages": [
                     {
                         "role": "system",
                         "content": (
-                            "You are JARVIS Core, an intelligent AI assistant."
+                            "You are JARVIS Core, an advanced AI assistant."
                         )
                     },
                     {
                         "role": "user",
                         "content": f"""
-                        Context:
-                        {context}
+Context:
+{context}
 
-                        User:
-                        {message}
-                        """
+User:
+{message}
+"""
                     }
                 ]
             },
@@ -45,11 +45,9 @@ def ask_llm(message, context=""):
 
         print("OPENROUTER RESPONSE:", data)
 
-        # verificar error API
         if "error" in data:
             return f"LLM API Error: {data['error']}"
 
-        # verificar choices
         if "choices" not in data:
             return f"LLM Invalid Response: {data}"
 
