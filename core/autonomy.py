@@ -1,5 +1,6 @@
 import time
 from memory.memory import get_memory
+from memory.intelligence import detect_user_pattern
 from modules.alerts import push_event
 
 def autonomy_loop():
@@ -7,14 +8,15 @@ def autonomy_loop():
     while True:
         mem = get_memory()
 
-        last_active = mem.get("last_active", time.time())
+        history = mem.get("history", [])
 
-        # si inactivo
-        if time.time() - last_active > 60:
+        patterns = detect_user_pattern(history)
 
-            tasks = mem.get("tasks", [])
+        # 🔥 detección de comportamiento
+        if patterns.get("task_user", 0) > 3:
+            push_event("Usuario con alta carga de tareas", "medium")
 
-            if tasks:
-                push_event(f"Tarea pendiente: {tasks[0]}", "medium")
+        if patterns.get("status_checker", 0) > 2:
+            push_event("Usuario monitorea estado frecuentemente", "low")
 
-        time.sleep(10)
+        time.sleep(15)
