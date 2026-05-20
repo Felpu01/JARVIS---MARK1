@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>JARVIS Core</title>
+
+    <style>
+
+        body {
+
+            background: #0b0f1a;
+            color: white;
+            font-family: Arial;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+
+            color: #00ffe1;
+        }
+
+        #chat {
+
+            margin-top: 20px;
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #00ffe1;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .msg {
+
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .user {
+
+            background: #1d3557;
+        }
+
+        .jarvis {
+
+            background: #2a9d8f;
+            color: black;
+        }
+
+        button {
+
+            margin-top: 20px;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            background: #00ffe1;
+            font-size: 18px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>JARVIS CORE</h1>
+
+    <button onclick="startVoice()">
+        🎤 Hablar
+    </button>
+
+    <div id="chat"></div>
+
+    <script>
+
+        const chat = document.getElementById("chat");
+
+        function addMessage(text, cls) {
+
+            const div = document.createElement("div");
+
+            div.className = "msg " + cls;
+
+            div.innerText = text;
+
+            chat.appendChild(div);
+
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        async function sendMessage(message) {
+
+            addMessage("🧑 " + message, "user");
+
+            const response = await fetch("/chat", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    message: message
+                })
+            });
+
+            const data = await response.json();
+
+            const text = data.response.response;
+
+            addMessage("🤖 " + text, "jarvis");
+
+            speak(text);
+        }
+
+        function speak(text) {
+
+            const speech = new SpeechSynthesisUtterance(text);
+
+            speech.lang = "es-ES";
+
+            window.speechSynthesis.speak(speech);
+        }
+
+        function startVoice() {
+
+            const recognition =
+                new webkitSpeechRecognition();
+
+            recognition.lang = "es-ES";
+
+            recognition.start();
+
+            recognition.onresult = function(event) {
+
+                const text =
+                    event.results[0][0].transcript;
+
+                sendMessage(text);
+            };
+        }
+
+    </script>
+
+</body>
+
+</html>
