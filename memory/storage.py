@@ -1,19 +1,52 @@
 import json
-import os
+from memory.supabase_client import supabase
 
-FILE = "runtime/state.json"
+TABLE = "mark34_memory"
 
+# =========================
+# LOAD ALL MEMORY
+# =========================
 def load_state():
-    if os.path.exists(FILE):
-        with open(FILE, "r") as f:
-            return json.load(f)
+    try:
+        res = supabase.table(TABLE).select("*").execute()
 
-    return {
-        "history": [],
-        "tasks": [],
-        "last_active": 0
-    }
+        state = {
+            "history": [],
+            "tasks": [],
+            "last_active": 0
+        }
 
-def save_state(state):
-    with open(FILE, "w") as f:
-        json.dump(state, f)
+        for row in res.data:
+            key = row["key"]
+            value = row["value"]
+
+            if key not in state:
+                state[key] = []
+
+            if isinstance(state[key], list):
+                state[key].append(value)
+            else:
+                state[key] = value
+
+        return state
+
+    except Exception as e:
+        print("⚠️ Supabase load error:", e)
+        return {
+            "history": [],
+            "tasks": [],
+            "last_active": 0
+        }
+
+# =========================
+# SAVE SINGLE EVENT
+# =========================
+def save_state(key, value):
+    try:
+        supabase.table(TABLE).insert({
+            "key": key,
+            "value": value
+        }).execute()
+
+    except Exception as e:
+        print("⚠️ Supabase save error:", e)
