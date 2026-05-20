@@ -2,5 +2,3 @@ flask
 gunicorn
 supabase
 requests
-openai-whisper
-ffmpeg-python
